@@ -1,0 +1,49 @@
+// https://developer.chrome.com/docs/extensions/mv3/mv3-migration/
+
+
+{
+  "name": "Web Accessibility Tool",
+  "manifest_version": 3,
+  "version": "1.0",
+
+  "permissions": [
+    "tabs"
+  ],
+
+  "host_permissions": [
+    "https://*.olx.com.br/*",
+  ],
+
+  "optional_host_permissions": [
+    "http://*.olx.com.br/*",
+  ],
+
+  "action": {
+    // "default_icon": "img/accessibility.png",
+    "default_title": "Immoco",
+    "default_popup": "popup/index.html",
+    // "popup": "popup/test.html"
+  },
+
+  "background": {
+    // "scripts": ["background.js"],
+    "service_worker": "background.js",
+    "type": "module"
+    // "persistent": false
+  },
+
+  "content_scripts":[
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": [
+        "/content_scripts/wat/prototype.js",
+        "/content_scripts/WCAG.js",
+        //"/content_scripts/wat/Guidelines.js",
+        "/content_scripts/wat/helper.js"
+        //"/content_scripts/wat/Principles.js",
+        //"/content_scripts/wat/Treemap.js",
+        //"/content_scripts/wat/Wat.js"
+      ]
+    }
+  ],
+}
