@@ -18,38 +18,45 @@ var imoveisArray = [];
 var paginasComErroArray = [];
 var temporizadorRepique = 5000;
 
-var paginacaoInicio = 1;
-var paginacaoFim = 100;
+var paginacaoInicio = parseInt(window.localStorage.colectorStart) || 1;
+var paginacaoFim = parseInt(window.localStorage.colectorEnd) || 100;
+var paginaVisitada = '';
 
-const tiposArray = [
+const tiposArray = window.localStorage.realEstateType ? [JSON.parse(window.localStorage.realEstateType).shift()] : [
 	'terrenos',
 	'venda'
 ];
 
+console.log(
+	'Iniciando em:', paginacaoInicio,
+	'\nFinalizando em:', paginacaoFim,
+	'\nTipos coletados:', tiposArray,
+);
+
 
 const pagesUrlArray = [
-// 'https://am.olx.com.br/regiao-de-manaus/outras-cidades/parintins',
-// 'https://ba.olx.com.br/regiao-de-vitoria-da-conquista-e-barreiras/todas-as-cidades/vitoria-da-conquista',
-// 'https://ce.olx.com.br/regiao-de-juazeiro-do-norte-e-sobral',
-// 'https://mg.olx.com.br/regiao-de-uberlandia-e-uberaba/triangulo-mineiro/ituiutaba',
-// 'https://mg.olx.com.br/regiao-de-uberlandia-e-uberaba/triangulo-mineiro/uberlandia',
-// 'https://ms.olx.com.br/mato-grosso-do-sul/dourados',
-// 'https://pa.olx.com.br/regiao-de-maraba/todas-as-cidades/maraba',
-// 'https://pa.olx.com.br/regiao-de-santarem/todas-as-cidades/santarem',
-// 'https://pb.olx.com.br/paraiba/campina-grande-guarabira-e-regiao/campina-grande',
-// 'https://pr.olx.com.br/regiao-de-maringa/regiao-de-maringa/maringa',
-// 'https://pr.olx.com.br/regiao-de-maringa/regiao-de-maringa/paicandu',
-// 'https://pr.olx.com.br/regiao-de-maringa/regiao-de-maringa/sarandi',
+'https://am.olx.com.br/regiao-de-manaus/outras-cidades/parintins',
+'https://ba.olx.com.br/regiao-de-vitoria-da-conquista-e-barreiras/todas-as-cidades/vitoria-da-conquista',
+'https://ce.olx.com.br/regiao-de-juazeiro-do-norte-e-sobral',
+'https://mg.olx.com.br/regiao-de-uberlandia-e-uberaba/triangulo-mineiro/ituiutaba',
+'https://mg.olx.com.br/regiao-de-uberlandia-e-uberaba/triangulo-mineiro/uberlandia',
+'https://ms.olx.com.br/mato-grosso-do-sul/dourados',
+'https://pa.olx.com.br/regiao-de-maraba/todas-as-cidades/maraba',
+'https://pa.olx.com.br/regiao-de-santarem/todas-as-cidades/santarem',
+'https://pb.olx.com.br/paraiba/campina-grande-guarabira-e-regiao/campina-grande',
+'https://pr.olx.com.br/regiao-de-maringa/regiao-de-maringa/maringa',
+'https://pr.olx.com.br/regiao-de-maringa/regiao-de-maringa/paicandu',
+'https://pr.olx.com.br/regiao-de-maringa/regiao-de-maringa/sarandi',
 'https://pr.olx.com.br/regiao-de-londrina/regiao-de-londrina/londrina',
-// 'https://rj.olx.com.br/serra-angra-dos-reis-e-regiao/vale-do-paraiba/resende',
-// 'https://rn.olx.com.br/rio-grande-do-norte/outras-cidades/mossoro',
-// 'https://rs.olx.com.br/regioes-de-caxias-do-sul-e-passo-fundo/regiao-de-passo-fundo/passo-fundo',
-// 'https://sc.olx.com.br/oeste-de-santa-catarina/regiao-de-chapeco/chapeco',
-// 'https://sp.olx.com.br/regiao-de-presidente-prudente/regiao-de-aracatuba/aracatuba',
-// 'https://sp.olx.com.br/regiao-de-bauru-e-marilia/regiao-de-bauru/bauru',
-// 'https://sp.olx.com.br/regiao-de-bauru-e-marilia/regiao-de-marilia/marilia',
-// 'https://sp.olx.com.br/regiao-de-presidente-prudente/pres-prudente-aracatuba-e-regiao/presidente-prudente',
-// 'https://sp.olx.com.br/regiao-de-ribeirao-preto/regiao-de-ribeirao-preto/ribeirao-preto',
+'https://rj.olx.com.br/serra-angra-dos-reis-e-regiao/vale-do-paraiba/resende',
+'https://rn.olx.com.br/rio-grande-do-norte/outras-cidades/mossoro',
+'https://rs.olx.com.br/regioes-de-caxias-do-sul-e-passo-fundo/regiao-de-passo-fundo/passo-fundo',
+'https://sc.olx.com.br/oeste-de-santa-catarina/regiao-de-chapeco/chapeco',
+'https://sp.olx.com.br/regiao-de-presidente-prudente/regiao-de-aracatuba/aracatuba',
+'https://sp.olx.com.br/regiao-de-bauru-e-marilia/regiao-de-bauru/bauru',
+'https://sp.olx.com.br/regiao-de-bauru-e-marilia/regiao-de-marilia/marilia',
+'https://sp.olx.com.br/regiao-de-presidente-prudente/pres-prudente-aracatuba-e-regiao/presidente-prudente',
+'https://sp.olx.com.br/regiao-de-ribeirao-preto/regiao-de-ribeirao-preto/ribeirao-preto',
 ];
 
 String.prototype.capitalize = function(){
@@ -106,27 +113,22 @@ function invalidType(type){
 
 function coletarUrls(){
 
-	if(window.location.href != pagesUrlArray[0])
-		window.location.href = pagesUrlArray[0];
+		console.log('COLETANDO URLS');
 
-	console.log('COLETANDO URLS');
+		paginaVisitada = window.location.href;
 
-	pagesUrlArray.forEach(paginaVisitada => {
 		tiposArray.forEach(tipo => {
-			for(let pagina = paginacaoInicio; pagina <= paginacaoFim; pagina++){
-	
+			for(let pagina = paginacaoInicio; pagina <= paginacaoFim; pagina++){		
 				fetch(`${paginaVisitada}/imoveis/${tipo}?o=${pagina}`,{
 					method: 'GET',
 					mode: 'no-cors',
 					headers: {'Content-Type': 'text/html'}
 				})
 				.then(response => response.text())
-				.then(htmlPage => {
-	
+				.then(htmlPage => {		
 					console.log('OK');
 					let tempAds = htmlPage.split(/adList|searchCategories/)[1];
-					tempAds = tempAds.replace(/(&quot;)|(&quot;:)/g,'');
-			
+					tempAds = tempAds.replace(/(&quot;)|(&quot;:)/g,'');				
 					linksDosProdutosArray.push(...tempAds.split(',').filter(items => items.match(/url:/)).map(url => url.replace(/url:/,'')));
 				})
 				.catch(error => {
@@ -134,28 +136,41 @@ function coletarUrls(){
 				})
 			}
 		});
-	});
-
-	var arrayLength = linksDosProdutosArray.length;
-
-	let timer = setInterval(() => {
-
-		if(arrayLength < linksDosProdutosArray.length)
-			arrayLength = linksDosProdutosArray.length
-		else{
-
-			if(linksDosProdutosArray.length < 4000){
-				temporizadorRepique = linksDosProdutosArray.length < 1500 ? 5000 : 30000;
-				console.log('Total de registros:',linksDosProdutosArray.length);
-				coletarInformacoesDasPaginas();
-				clearInterval(timer);
-			}
+	
+		var arrayLength = linksDosProdutosArray.length;
+	
+		let timer = setInterval(() => {
+	
+			if(arrayLength < linksDosProdutosArray.length)
+				arrayLength = linksDosProdutosArray.length
 			else{
-				console.log('Número de produtos muito longo:',linksDosProdutosArray.length);
-				clearInterval(timer);
+	
+				if(linksDosProdutosArray.length <= 2500){
+					temporizadorRepique = linksDosProdutosArray.length < 1500 ? 5000 : 30000;
+					console.log('Total de registros:',linksDosProdutosArray.length);
+					coletarInformacoesDasPaginas();
+					clearInterval(timer);
+				}
+				else{
+					console.log('Número de produtos muito longo:',linksDosProdutosArray.length);
+	
+					if(tiposArray.length > 1){
+						window.localStorage.realEstateType = JSON.stringify(tiposArray)
+					}
+					else{
+						if((paginacaoFim/2) >= 25)
+							window.localStorage.colectorEnd = paginacaoFim/2
+						
+					}
+	
+					setTimeout(() => {
+						window.location.reload();
+					}, 3000);
+	
+					clearInterval(timer);
+				}
 			}
-		}
-	},5000)
+		},5000)
 }
 
 
@@ -228,14 +243,14 @@ function coletarInformacoesDasPaginas(){
 //REPIQUE
 function repiqueControlador(){
 
-	let timer = setInterval(() => {
+	// let timer = setInterval(() => {
 
-		if(!paginasComErroArray.length){// verificando se está vazio o array de paginas com erro
+	setTimeout(() => {
+		if(!paginasComErroArray.length)// verificando se está vazio o array de paginas com erro
 			eliminarDuplicadas()
-			clearInterval(timer)
-		}
+
 		else{
-			if(paginasComErroArray.length < 100)
+			if(paginasComErroArray.length < 150)
 				temporizadorRepique = 5000;
 
 			repique()			
@@ -279,6 +294,8 @@ function repique(){
 			paginasComErroArray.splice(index,1);
 		})
 	});
+
+	repiqueControlador()
 }
 
 //Eliminando URL's duplicadas 
@@ -329,7 +346,7 @@ function gerarArquivo(){
 	
 	let csvContent = csvMimeType + csvRowsFileArray.map(e => e.join(",")).join("\n");
 	
-	const estado = pagesUrlArray[0].split(/\//g)[2].split(/\./).shift().toUpperCase();
+	const estado = paginaVisitada.split(/\//g)[2].split(/\./).shift().toUpperCase();
 	var parte = '';
 
 	if((paginacaoInicio === 1) && (paginacaoFim === 50))
@@ -350,12 +367,45 @@ function gerarArquivo(){
 	if((paginacaoInicio === 76) && (paginacaoFim === 100))
 		parte += ' - pt4'
 
-	const fileName = pagesUrlArray[0].split(/\//).pop().capitalize() + ((!tiposArray.includes('terrenos') ? ' (imóveis)' : '') || (!tiposArray.includes('venda') ? ' (terrenos)' : ''));
+
+	const fileName = paginaVisitada.split(/\//).pop().capitalize() + ((!tiposArray.includes('terrenos') ? ' (imóveis)' : '') || (!tiposArray.includes('venda') ? ' (terrenos)' : ''));
 	
 	let link = document.createElement('a');
 	link.download = `${estado} - ${fileName} - ${getDate().dia}-${getDate().mes}-${getDate().ano}${parte}.csv`;
 	link.href = csvContent;
 	link.click();
+
+	if(paginacaoFim < 100){
+		window.localStorage.colectorStart = paginacaoFim+1;
+		window.localStorage.colectorEnd = paginacaoFim+(paginacaoFim-(paginacaoInicio-1));
+
+		setTimeout(() => {
+			window.location.reload();
+		}, 3000);
+	}
+	else{
+		window.localStorage.colectorStart = 1;
+		window.localStorage.colectorEnd = 100;
+
+		if(window.localStorage.realEstateType && (JSON.parse(window.localStorage.realEstateType).length > 1)){
+			window.localStorage.realEstateType = JSON.stringify([JSON.parse(window.localStorage.realEstateType).pop()]);
+
+			setTimeout(() => {
+				window.location.reload();
+			}, 3000);
+		}
+		else{
+			window.localStorage.realEstateType = ''
+
+			setTimeout(() => {
+				let currentUrlIndex = pagesUrlArray.findIndex(url => url.match(paginaVisitada));
+		
+				if(pagesUrlArray[currentUrlIndex+1])
+					window.location.href = pagesUrlArray[currentUrlIndex+1];
+		
+			}, 3000)
+		}
+	}
 }
 
 
