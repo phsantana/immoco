@@ -1,6 +1,3 @@
-//data (dia /mês/ ano)	Bairro	Tipo	Uso	Área do Terreno	Área Construida	Área Útil	 Anunciante	n dormitórios	 Preço 
-
-
 // Pesquisar: SPSS (Estatística)
 // Coletar toda segunda 
 
