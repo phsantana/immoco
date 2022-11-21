@@ -142,9 +142,16 @@ function coletarUrls(){
 				arrayLength = linksDosProdutosArray.length
 			else{
 	
-				if(linksDosProdutosArray.length <= 2500){
-					temporizadorRepique = linksDosProdutosArray.length < 1500 ? 5000 : 30000;
+				if(linksDosProdutosArray.length < 2500){
+
 					console.log('Total de registros:',linksDosProdutosArray.length);
+
+					if(!linksDosProdutosArray.length){
+						finalizaColeta();
+						clearInterval(timer);
+					}
+
+					temporizadorRepique = linksDosProdutosArray.length < 1500 ? 5000 : 30000;
 					coletarInformacoesDasPaginas();
 					clearInterval(timer);
 				}
@@ -372,6 +379,10 @@ function gerarArquivo(){
 	link.href = csvContent;
 	link.click();
 
+	finalizaColeta();
+}
+
+function finalizaColeta(){
 	if(paginacaoFim < 100){
 		window.localStorage.colectorStart = paginacaoFim+1;
 		window.localStorage.colectorEnd = paginacaoFim+(paginacaoFim-(paginacaoInicio-1));
