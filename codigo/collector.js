@@ -30,7 +30,7 @@ console.log(
 	'\nTipos coletados:', tiposArray,
 );
 
-
+/*
 const pagesUrlArray = [
 'https://am.olx.com.br/regiao-de-manaus/outras-cidades/parintins',
 'https://ba.olx.com.br/regiao-de-vitoria-da-conquista-e-barreiras/todas-as-cidades/vitoria-da-conquista',
@@ -54,6 +54,53 @@ const pagesUrlArray = [
 'https://sp.olx.com.br/regiao-de-bauru-e-marilia/regiao-de-marilia/marilia',
 'https://sp.olx.com.br/regiao-de-presidente-prudente/pres-prudente-aracatuba-e-regiao/presidente-prudente',
 'https://sp.olx.com.br/regiao-de-ribeirao-preto/regiao-de-ribeirao-preto/ribeirao-preto',
+];
+*/
+
+const estadosVisitados = [
+'am',
+'ba',
+'ce',
+'mg',
+'mg',
+'ms',
+'pa',
+'pa',
+'pb',
+'pr',
+'pr',
+'pr',
+'pr',
+'rj',
+'rn',
+'rs',
+'sc',
+'sp',
+];
+
+const pagesUrlArray = [
+'olx.com.br/regiao-de-manaus/outras-cidades/parintins',
+'olx.com.br/regiao-de-vitoria-da-conquista-e-barreiras/todas-as-cidades/vitoria-da-conquista',
+'olx.com.br/regiao-de-juazeiro-do-norte-e-sobral',
+'olx.com.br/regiao-de-uberlandia-e-uberaba/triangulo-mineiro/ituiutaba',
+'olx.com.br/regiao-de-uberlandia-e-uberaba/triangulo-mineiro/uberlandia',
+'olx.com.br/mato-grosso-do-sul/dourados',
+'olx.com.br/regiao-de-maraba/todas-as-cidades/maraba',
+'olx.com.br/regiao-de-santarem/todas-as-cidades/santarem',
+'olx.com.br/paraiba/campina-grande-guarabira-e-regiao/campina-grande',
+'olx.com.br/regiao-de-maringa/regiao-de-maringa/maringa',
+'olx.com.br/regiao-de-maringa/regiao-de-maringa/paicandu',
+'olx.com.br/regiao-de-maringa/regiao-de-maringa/sarandi',
+'olx.com.br/regiao-de-londrina/regiao-de-londrina/londrina',
+'olx.com.br/serra-angra-dos-reis-e-regiao/vale-do-paraiba/resende',
+'olx.com.br/rio-grande-do-norte/outras-cidades/mossoro',
+'olx.com.br/regioes-de-caxias-do-sul-e-passo-fundo/regiao-de-passo-fundo/passo-fundo',
+'olx.com.br/oeste-de-santa-catarina/regiao-de-chapeco/chapeco',
+'olx.com.br/regiao-de-presidente-prudente/regiao-de-aracatuba/aracatuba',
+'olx.com.br/regiao-de-bauru-e-marilia/regiao-de-bauru/bauru',
+'olx.com.br/regiao-de-bauru-e-marilia/regiao-de-marilia/marilia',
+'olx.com.br/regiao-de-presidente-prudente/pres-prudente-aracatuba-e-regiao/presidente-prudente',
+'olx.com.br/regiao-de-ribeirao-preto/regiao-de-ribeirao-preto/ribeirao-preto',
 ];
 
 String.prototype.capitalize = function(){

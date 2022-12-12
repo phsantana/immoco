@@ -158,13 +158,12 @@ function coletarUrls(){
 				else{
 					console.log('Número de produtos muito longo:',linksDosProdutosArray.length);
 	
-					if(tiposArray.length > 1){
+					if(tiposArray.length > 1)
 						window.localStorage.realEstateType = JSON.stringify(tiposArray)
-					}
+
 					else{
-						if((paginacaoFim/2) >= 25)
-							window.localStorage.colectorEnd = paginacaoFim/2
-						
+						if((paginacaoFim/4) >= 25)
+							window.localStorage.colectorEnd = paginacaoFim/4
 					}
 	
 					setTimeout(() => {
@@ -249,6 +248,9 @@ function repiqueControlador(){
 
 	// let timer = setInterval(() => {
 
+	if(linksDosProdutosArray)
+		linksDosProdutosArray = null;
+
 	setTimeout(() => {
 		if(!paginasComErroArray.length)// verificando se está vazio o array de paginas com erro
 			eliminarDuplicadas()
@@ -315,7 +317,8 @@ function eliminarDuplicadas(){
 	});
 
 	setTimeout(() => {
-		gerarArquivo()
+		paginasComErroArray = null;
+		gerarArquivo();
 	},2000);
 }
 
@@ -383,6 +386,10 @@ function gerarArquivo(){
 }
 
 function finalizaColeta(){
+
+	linksDosProdutosArray = null;
+	imoveisArray = null;
+
 	if(paginacaoFim < 100){
 		window.localStorage.colectorStart = paginacaoFim+1;
 		window.localStorage.colectorEnd = paginacaoFim+(paginacaoFim-(paginacaoInicio-1));
