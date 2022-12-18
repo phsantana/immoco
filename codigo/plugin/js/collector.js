@@ -19,18 +19,19 @@ var paginacaoInicio = parseInt(window.localStorage.colectorStart) || 1;
 var paginacaoFim = parseInt(window.localStorage.colectorEnd) || 100;
 var paginaVisitada = '';
 
+const urlBase = 'https://www.olx.com.br';
+
 const tiposArray = window.localStorage.realEstateType ? [JSON.parse(window.localStorage.realEstateType).shift()] : [
 	'terrenos',
 	'venda'
 ];
 
-console.log(
-	'Iniciando em:', paginacaoInicio,
-	'\nFinalizando em:', paginacaoFim,
-	'\nTipos coletados:', tiposArray,
-);
+setStatesToBeVisit();
+setSlugs();
 
+const currentState = getStateToBeVisit();
 
+/*
 const pagesUrlArray = [
 'https://am.olx.com.br/regiao-de-manaus/outras-cidades/parintins',
 'https://ba.olx.com.br/regiao-de-vitoria-da-conquista-e-barreiras/todas-as-cidades/vitoria-da-conquista',
@@ -53,56 +54,19 @@ const pagesUrlArray = [
 'https://sp.olx.com.br/regiao-de-bauru-e-marilia/regiao-de-bauru/bauru',
 'https://sp.olx.com.br/regiao-de-bauru-e-marilia/regiao-de-marilia/marilia',
 'https://sp.olx.com.br/regiao-de-presidente-prudente/pres-prudente-aracatuba-e-regiao/presidente-prudente',
-'https://sp.olx.com.br/regiao-de-ribeirao-preto/regiao-de-ribeirao-preto/ribeirao-preto',
+'https://sp.olx.com.br/regiao-de-ribeirao-preto/regiao-de-ribeirao-preto/ribeirao-preto'
 ];
+*/
 
-String.prototype.capitalize = function(){
-	let firstLetter = this.charAt(0);
+var slug = getSlugToBeVisit(currentState);
+const nomeCidade = getCityName(slug)
 
-	return this.replace(firstLetter, firstLetter.toUpperCase())
-}
-
-var filtroColetor = (text,filtro) => {
-
-	let resultado = text.replace(/(&quot;)|(&quot;:)/g,'').split(',').filter(sentence => sentence.match(filtro));
-
-	if(resultado.length)
-		return 	resultado
-				.pop()
-				.replace(filtro,'')
-				.replace(/\"|\}/g,'')
-				.replace(/\&amp;/,'&')
-				.trim()
-	else
-		return '';
-}
-
-var conversorDeData = data => {
-	let tempData = data.split(/-/);
-
-	return tempData[2]+'/'+tempData[1]+'/'+tempData[0];
-}
-
-function getDate(){
-	const dateNow = Date().split(/\s/g);
-	return {
-		mes: dateNow[1],
-		dia: dateNow[2],
-		ano: dateNow[3],
-		hora: dateNow[4]
-	}
-}
-
-function invalidType(type){
-	const notValidTypesArray = [
-	'sítios e chácaras',
-	'chácaras',
-	'sítios',
-	'fazendas'
-	];
-
-	return notValidTypesArray.includes(type);
-}
+console.log(
+	'Estado:', currentState,
+	'\nIniciando em:', paginacaoInicio,
+	'\nFinalizando em:', paginacaoFim,
+	'\nTipos coletados:', tiposArray,
+);
 
 
 //FASE 1
@@ -115,8 +79,8 @@ function coletarUrls(){
 		paginaVisitada = window.location.href;
 
 		tiposArray.forEach(tipo => {
-			for(let pagina = paginacaoInicio; pagina <= paginacaoFim; pagina++){		
-				fetch(`${paginaVisitada}/imoveis/${tipo}?o=${pagina}`,{
+			for(let pagina = paginacaoInicio; pagina <= paginacaoFim; pagina++){
+				fetch(`${urlBase}/imoveis/${tipo}/estado-${currentState}/${slug}?o=${pagina}`,{
 					method: 'GET',
 					mode: 'no-cors',
 					headers: {'Content-Type': 'text/html'}
@@ -130,7 +94,7 @@ function coletarUrls(){
 				})
 				.catch(error => {
 					console.error('Error: ',error);
-				})
+				});
 			}
 		});
 	
@@ -147,7 +111,7 @@ function coletarUrls(){
 					console.log('Total de registros:',linksDosProdutosArray.length);
 
 					if(!linksDosProdutosArray.length){
-						finalizaColeta();
+						finalizaColeta(imoveisArray);
 						clearInterval(timer);
 					}
 
@@ -156,7 +120,7 @@ function coletarUrls(){
 					clearInterval(timer);
 				}
 				else{
-					console.log('Número de produtos muito longo:',linksDosProdutosArray.length);
+					console.log('Número de produtos muito longo:',linksDosProdutosArray);
 	
 					if(tiposArray.length > 1)
 						window.localStorage.realEstateType = JSON.stringify(tiposArray)
@@ -167,7 +131,7 @@ function coletarUrls(){
 					}
 	
 					setTimeout(() => {
-						window.location.reload();
+						//window.location.reload();
 					}, 3000);
 	
 					clearInterval(timer);
@@ -181,7 +145,6 @@ function coletarUrls(){
 
 //FASE 2
 //Coletar informações das páginas dos produtos
-
 
 function coletarInformacoesDasPaginas(){
 
@@ -235,7 +198,7 @@ function coletarInformacoesDasPaginas(){
 				clearInterval(timer)
 			}
 			else{
-				gerarArquivo();
+				gerarArquivo(imoveisArray,currentState,nomeCidade);
 				clearInterval(timer)
 			}
 
@@ -248,8 +211,7 @@ function repiqueControlador(){
 
 	// let timer = setInterval(() => {
 
-	if(linksDosProdutosArray)
-		linksDosProdutosArray = null;
+	flushArrays(linksDosProdutosArray);
 
 	setTimeout(() => {
 		if(!paginasComErroArray.length)// verificando se está vazio o array de paginas com erro
@@ -304,91 +266,13 @@ function repique(){
 	repiqueControlador()
 }
 
-//Eliminando URL's duplicadas 
-function eliminarDuplicadas(){
-
-	console.log('ELIMINANDO DUPLICATAS');
-
-	imoveisArray.forEach(imovel => {
-		paginasComErroArray.forEach((link,index,self) => {
-			if(imovel.url === link)
-				self.splice(index,1)
-		})
-	});
-
-	setTimeout(() => {
-		paginasComErroArray = null;
-		gerarArquivo();
-	},2000);
-}
-
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-//FASE 3
-//Geração do arquivo CSV
 
-function gerarArquivo(){
+function finalizaColeta(imoveis){
 
-	console.log('GERANDO ARQUIVO');
-
-	var csvMimeType = 'data:text/csv;charset=utf-8,';
-	var csvRowsFileArray = [['tipo','quartos','preço','bairro','cidade','estado','área construida','anunciante','data do anuncio','url','data da coleta','hora da coleta']];
-	
-	imoveisArray.forEach(imovel => {
-		csvRowsFileArray.push([
-			imovel.tipo,
-			imovel.quartos,
-			imovel.preco,
-			imovel.bairro,
-			imovel.cidade,
-			imovel.estado,
-			imovel.areaConstruida,
-			imovel.anunciante,
-			imovel.dataDoAnuncio,
-			imovel.url,
-			imovel.dataDaColeta,
-			imovel.horaDaColeta
-		]);
-	})
-	
-	let csvContent = csvMimeType + csvRowsFileArray.map(e => e.join(",")).join("\n");
-	
-	const estado = paginaVisitada.split(/\//g)[2].split(/\./).shift().toUpperCase();
-	var parte = '';
-
-	if((paginacaoInicio === 1) && (paginacaoFim === 50))
-		parte += ' - pt1'
-
-	if((paginacaoInicio === 51) && (paginacaoFim === 100))
-		parte += ' - pt2'
-
-	if((paginacaoInicio === 1) && (paginacaoFim === 25))
-		parte += ' - pt1'
-
-	if((paginacaoInicio === 26) && (paginacaoFim === 50))
-		parte += ' - pt2'
-
-	if((paginacaoInicio === 51) && (paginacaoFim === 75))
-		parte += ' - pt3'
-
-	if((paginacaoInicio === 76) && (paginacaoFim === 100))
-		parte += ' - pt4'
-
-
-	const fileName = paginaVisitada.split(/\//).pop().capitalize() + ((!tiposArray.includes('terrenos') ? ' (imóveis)' : '') || (!tiposArray.includes('venda') ? ' (terrenos)' : ''));
-	
-	let link = document.createElement('a');
-	link.download = `${estado} - ${fileName} - ${getDate().dia}-${getDate().mes}-${getDate().ano}${parte}.csv`;
-	link.href = csvContent;
-	link.click();
-
-	finalizaColeta();
-}
-
-function finalizaColeta(){
-
-	linksDosProdutosArray = null;
-	imoveisArray = null;
+	flushArrays(linksDosProdutosArray);
+	flushArrays(imoveis);
 
 	if(paginacaoFim < 100){
 		window.localStorage.colectorStart = paginacaoFim+1;
@@ -413,11 +297,17 @@ function finalizaColeta(){
 			window.localStorage.realEstateType = ''
 
 			setTimeout(() => {
+				/*
 				let currentUrlIndex = pagesUrlArray.findIndex(url => url.match(paginaVisitada));
 		
 				if(pagesUrlArray[currentUrlIndex+1])
 					window.location.href = pagesUrlArray[currentUrlIndex+1];
-		
+
+				*/
+
+				updateDataStorage(currentState);
+
+				window.location.reload();
 			}, 3000)
 		}
 	}
@@ -428,5 +318,5 @@ function finalizaColeta(){
 
 
 window.addEventListener('load', () => {
-	coletarUrls()
+	coletarUrls(imoveisArray)
 })

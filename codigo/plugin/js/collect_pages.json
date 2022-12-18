@@ -1,0 +1,49 @@
+{
+"am":[
+	"regiao-de-manaus/outras-cidades/parintins"
+],
+"ba":[
+	"regiao-de-vitoria-da-conquista-e-barreiras/todas-as-cidades/vitoria-da-conquista"
+],
+"ce":[
+	"regiao-de-juazeiro-do-norte-e-sobral"
+],
+"mg":[
+	"regiao-de-uberlandia-e-uberaba/triangulo-mineiro/ituiutaba",
+	"regiao-de-uberlandia-e-uberaba/triangulo-mineiro/uberlandia"
+],
+"ms":[
+	"mato-grosso-do-sul/dourados"
+],
+"pa":[
+	"regiao-de-maraba/todas-as-cidades/maraba",
+	"regiao-de-santarem/todas-as-cidades/santarem"
+],
+"pb":[
+	"paraiba/campina-grande-guarabira-e-regiao/campina-grande"
+],
+"pr":[
+	"regiao-de-maringa/regiao-de-maringa/maringa",
+	"regiao-de-maringa/regiao-de-maringa/paicandu",
+	"regiao-de-maringa/regiao-de-maringa/sarandi",
+	"regiao-de-londrina/regiao-de-londrina/londrina"
+],
+"rj":[
+	"serra-angra-dos-reis-e-regiao/vale-do-paraiba/resende"
+],
+"rn":[
+	"rio-grande-do-norte/outras-cidades/mossoro"
+],
+"rs":[
+	"regioes-de-caxias-do-sul-e-passo-fundo/regiao-de-passo-fundo/passo-fundo"
+],
+"sc":[
+	"oeste-de-santa-catarina/regiao-de-chapeco/chapeco"
+],
+"sp":[
+	"regiao-de-presidente-prudente/regiao-de-aracatuba/aracatuba",
+	"regiao-de-bauru-e-marilia/regiao-de-bauru/bauru",
+	"regiao-de-bauru-e-marilia/regiao-de-marilia/marilia",
+	"regiao-de-presidente-prudente/pres-prudente-aracatuba-e-regiao/presidente-prudente",
+	"regiao-de-ribeirao-preto/regiao-de-ribeirao-preto/ribeirao-preto"
+]}
