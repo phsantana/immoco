@@ -159,7 +159,6 @@ function coletarInformacoesDasPaginas(){
 		.then(response => response.text())
 		.then(htmlDaPagina => {
 			console.log('OK');
-			let docDaPagina = new DOMParser().parseFromString(htmlDaPagina,'text/html');
 			let coleta = getDate();
 	
 			if(!invalidType(filtroColetor(htmlDaPagina,/"real_estate_type":/).toLowerCase())){
@@ -240,7 +239,6 @@ function repique(){
 		.then(response => response.text())
 		.then(htmlDaPagina => {
 			console.log('OK');
-			let docDaPagina = new DOMParser().parseFromString(htmlDaPagina,'text/html');
 			let coleta = getDate();
 	
 			if(!invalidType(filtroColetor(htmlDaPagina,/"real_estate_type":/).toLowerCase())){
@@ -318,5 +316,5 @@ function finalizaColeta(imoveis){
 
 
 window.addEventListener('load', () => {
-	coletarUrls(imoveisArray)
+	//coletarUrls(imoveisArray)
 })
