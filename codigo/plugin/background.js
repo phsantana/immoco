@@ -146,17 +146,20 @@ var conversorDeData = data => {
 	return tempData[2]+'/'+tempData[1]+'/'+tempData[0];
 }
 
+const getCityName = slug => slug.split('/').pop();
+
 var linksDosProdutosArray = [];
 var imoveisArray = [];
 var paginasComErroArray = [];
 
 const urlBase = 'https://www.olx.com.br';
+
 const tiposArray = [
 	'terrenos',
 	'venda'
 	];
 
-const slugsPorRegiaoArray = {
+var slugsPorRegiaoArray = {
 // am:[
 // 	"regiao-de-manaus/outras-cidades/parintins"
 // ],
@@ -192,49 +195,53 @@ const slugsPorRegiaoArray = {
 // rn:[
 // 	"rio-grande-do-norte/outras-cidades/mossoro"
 // ],
-// rs:[
-// 	"regioes-de-caxias-do-sul-e-passo-fundo/regiao-de-passo-fundo/passo-fundo"
-// ],
-// sc:[
-// 	"oeste-de-santa-catarina/regiao-de-chapeco/chapeco"
-// ],
+rs:[
+	"regioes-de-caxias-do-sul-e-passo-fundo/regiao-de-passo-fundo/passo-fundo"
+],
+sc:[
+	"oeste-de-santa-catarina/regiao-de-chapeco/chapeco"
+],
 sp:[
-	// "regiao-de-presidente-prudente/regiao-de-aracatuba/aracatuba",
-	// "regiao-de-bauru-e-marilia/regiao-de-bauru/bauru",
-	// "regiao-de-bauru-e-marilia/regiao-de-marilia/marilia",
-	// "regiao-de-presidente-prudente/pres-prudente-aracatuba-e-regiao/presidente-prudente",
+	"regiao-de-presidente-prudente/regiao-de-aracatuba/aracatuba",
+	"regiao-de-bauru-e-marilia/regiao-de-bauru/bauru",
+	"regiao-de-bauru-e-marilia/regiao-de-marilia/marilia",
+	"regiao-de-presidente-prudente/pres-prudente-aracatuba-e-regiao/presidente-prudente",
 	"regiao-de-ribeirao-preto/regiao-de-ribeirao-preto/ribeirao-preto"
 ]
+
 };
 
-const regioesArray = Object.keys(slugsPorRegiaoArray);
+var socket;
+var cidade;
+var regioesArray = Object.keys(slugsPorRegiaoArray);
 
-function coletarUrls(){
+function coletarUrls(slug,uf){
 
 		console.log('COLETANDO URLS');
 
+		cidade = getCityName(slug);
+
+		console.log('Estado coletado',uf);
+		console.log('Cidade coletada', cidade);
+
 		tiposArray.forEach(tipo => {
-			regioesArray.forEach(uf => {
-				slugsPorRegiaoArray[uf].forEach(slug => {
-					for(let pagina = 1; pagina <= 100; pagina++){
-						fetch(`${urlBase}/imoveis/${tipo}/estado-${uf}/${slug}?o=${pagina}`,{
-							method: 'GET',
-							mode: 'no-cors',
-							headers: {'Content-Type': 'text/html'}
-						})
-						.then(response => response.text())
-						.then(htmlPage => {		
-							// console.log('OK');
-							let tempAds = htmlPage.split(/adList|searchCategories/)[1];
-							tempAds = tempAds.replace(/(&quot;)|(&quot;:)/g,'');				
-							linksDosProdutosArray.push(...tempAds.split(',').filter(items => items.match(/url:/)).map(url => url.replace(/url:/,'')));
-						})
-						.catch(error => {
-							console.error('Error: ',error);
-						});
-					}
+			for(let pagina = 1; pagina <= 100; pagina++){
+				fetch(`${urlBase}/imoveis/${tipo}/estado-${uf}/${slug}?o=${pagina}`,{
+					method: 'GET',
+					mode: 'no-cors',
+					headers: {'Content-Type': 'text/html'}
+				})
+				.then(response => response.text())
+				.then(htmlPage => {		
+					// console.log('OK');
+					let tempAds = htmlPage.split(/adList|searchCategories/)[1];
+					tempAds = tempAds.replace(/(&quot;)|(&quot;:)/g,'');				
+					linksDosProdutosArray.push(...tempAds.split(',').filter(items => items.match(/url:/)).map(url => url.replace(/url:/,'')));
+				})
+				.catch(error => {
+					console.error('Error: ',error);
 				});
-			});
+			}
 		});
 	
 		var arrayLength = linksDosProdutosArray.length;
@@ -322,6 +329,21 @@ function coletarInformacoesDasPaginas(){
 			else{
 				// gerarArquivo(imoveisArray,currentState,nomeCidade);
 				console.log('BUSCA FINALIZADA');
+
+				let estado = regioesArray[0];
+
+				linksDosProdutosArray = [];
+				console.log('Links dos produtos', linksDosProdutosArray);
+
+				fetch('http://localhost:3000/'+estado)
+  				.then(response => response.json())
+  				.then(response => socket.postMessage({
+  					estado: estado,
+  					tipos: tiposArray,
+  					cidade: cidade,
+  					imoveis: response
+  				}));
+
 				clearInterval(timer)
 			}
 
@@ -332,7 +354,20 @@ function coletarInformacoesDasPaginas(){
 //REPIQUE
 function repiqueControlador(){
 
-	flushArrays(linksDosProdutosArray);
+	linksDosProdutosArray = [];
+	console.log('Páginas restantes:', paginasComErroArray.length);
+
+	let intervalo = 30000;
+
+	if((paginasComErroArray.length > 500) && (paginasComErroArray.length <= 900)){
+			intervalo = 10000;
+			console.log('Intervalo de 10 segundos');
+	}
+
+	if(paginasComErroArray.length <= 500){
+		intervalo = 5000;
+		console.log('Intervalo de 5 segundos');
+	}
 
 	setTimeout(() => {
 		if(!paginasComErroArray.length)// verificando se está vazio o array de paginas com erro
@@ -340,7 +375,7 @@ function repiqueControlador(){
 
 		else
 			repique();
-	},30000);
+	},intervalo);
 }
 
 
@@ -405,45 +440,85 @@ function eliminarDuplicadas(imoveis){
 
 	console.log('ELIMINANDO DUPLICATAS');
 
-	imoveis.forEach(imovel => {
-		paginasComErroArray.forEach((link,index,self) => {
-			if(imovel.url === link)
-				self.splice(index,1)
-		})
-	});
+	// imoveis.forEach(imovel => {
+	// 	paginasComErroArray.forEach((link,index,self) => {
+	// 		if(imovel.url === link)
+	// 			self.splice(index,1)
+	// 	})
+	// });
 
-	setTimeout(() => {
-		flushArrays(paginasComErroArray);
-		console.log('FINALIZANDO BUSCA');
-	},2000);
+	fetch('http://localhost:3000/eliminate-doubled',{method: 'POST'})
+	.then(response => response.text())
+	.then(response => {
+
+		console.log(response);
+
+		setTimeout(() => {
+			paginasComErroArray = [];
+			console.log('FINALIZANDO BUSCA');
+	
+			let estado = regioesArray[0];
+	
+			fetch('http://localhost:3000/'+estado)
+  			.then(response => response.json())
+  			.then(response => socket.postMessage({
+  					estado: estado,
+  					tipos: tiposArray,
+  					cidade: cidade,
+  					imoveis: response
+  				}));
+			},2000);
+	});
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  // 2. A page requested user data, respond with a copy of `user`
-  if (message === 'start-extraction') {
-    // sendResponse(user);
-    fetch('http://localhost:3000/clear',{
-    	method: 'POST'
-    })
-    .then(response => console.log('Server cleared'));
+chrome.runtime.onConnect.addListener(port => {
 
-    coletarUrls();
+	if(port.name === 'Popup'){
 
-    sendResponse('Extração iniciada');
-  }
-  else{
-  	let estado = regioesArray[0];
+		socket = port;
 
-  	console.log(estado);
+		port.onMessage.addListener(src => {
+	// })
+	
+	// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  	// 2. A page requested user data, respond with a copy of `user`
+  			if (src.msg === 'start-extraction') {
+    			// sendResponse(user);
+    			fetch('http://localhost:3000/clear',{
+    				method: 'POST'
+    			})
+    			.then(response => response.text())
+    			.then(response => console.log(response));
 
-  	fetch('http://localhost:3000/'+estado)
-  	.then(response => response.json())
-  	.then(response => sendResponse({
-  		estado: estado,
-  		tipos: tiposArray,
-  		imoveis: response
-  	}));
+    			if(regioesArray.length){
+    				if(!slugsPorRegiaoArray[regioesArray[0]].length)
+						regioesArray.shift();
+		
+					let slug = slugsPorRegiaoArray[regioesArray[0]].shift()
+					let uf = regioesArray[0];
 
-  	return true;
-  }
+					let timer = setInterval(() => {
+
+						fetch('http://localhost:3000/check-status')
+						.then(response => response.text())
+						.then(response => {
+							let taskServer = parseInt(response);
+
+							console.log('Status do servidor:',taskServer);
+
+							if(!taskServer){
+								coletarUrls(slug,uf);
+								clearInterval(timer);
+							}
+							else{
+								fetch('http://localhost:3000/clear')
+								.then(response => response);
+							}
+						})
+					},5000);
+    			}
+  			}
+		})
+	}
 });
+

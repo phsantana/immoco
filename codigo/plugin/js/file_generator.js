@@ -58,7 +58,7 @@
 // 	finalizaColeta();
 // }
 
-function gerarArquivo(estado,tipos,imoveis){
+function gerarArquivo(estado,tipos,cidade,imoveis){
 
 	console.log('GERANDO ARQUIVO');
 
@@ -87,7 +87,7 @@ function gerarArquivo(estado,tipos,imoveis){
 	let csvContent = csvMimeType + csvRowsFileArray.map(e => e.join(",")).join("\n");
 	
 	let link = document.createElement('a');
-	link.download = `${estado.toUpperCase()} - (${tipos}) - ${getDate().dia}-${getDate().mes}-${getDate().ano}.csv`;
+	link.download = `${estado.toUpperCase()} - ${cidade} - (${tipos}) - ${getDate().dia}-${getDate().mes}-${getDate().ano}.csv`;
 	link.href = csvContent;
 	link.click();
 }
