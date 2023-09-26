@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Bilboo</title>
+	<style>
+		html{
+			width: 200px;
+		}
+
+		body{
+			display: flex;
+			justify-content: center;
+		}
+
+		.btn{
+			padding: 8px 4px;
+			color: white;
+			background: firebrick;
+			font-size: 12pt;
+			cursor: pointer;
+			transition: all ease .2s;
+		}
+
+		.btn:hover{
+			opacity: .75;
+		}
+
+	</style>
+</head>
+<body>
+	<main>
+		<button id="iniciar-coleta" class="btn">Iniciar coleta</button>
+		<!-- <button id="gerar-arquivo" class="btn">Baixar CSV</button> -->
+	</main>
+</body>
+<script type="text/javascript" src="../js/utils.js" async></script>
+<script type="text/javascript" src="../js/file_generator.js" async></script>
+<script type="text/javascript" src="popup.js" async></script>
+</html>
