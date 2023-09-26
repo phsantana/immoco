@@ -19,12 +19,12 @@ buttonStartCollect.addEventListener('click', () => {
   
       console.log(src);
   
-      if(src.msg == 'Hello'){
-        console.log('Mensagem recebida');
+      if(src.msg == 'empty'){
+        port.postMessage({msg: 'start-extraction'})
       }
       else{
   
-        console.log(src);
+        console.log('Recebido do background', src);
   
         let {estado,tipos,cidade,imoveis} = src;
   

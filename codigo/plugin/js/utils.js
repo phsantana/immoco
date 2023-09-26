@@ -4,6 +4,10 @@ String.prototype.capitalize = function(){
 	return this.replace(firstLetter, firstLetter.toUpperCase())
 }
 
+var normalizeCsvContent = csvContent => csvContent
+.replace(/\#/g,'')
+.replace(/\&amp/g,'e')
+
 var getCityName = slug => slug.split(/\//).pop();
 
 var filtroColetor = (text,filtro) => {
@@ -44,6 +48,9 @@ function invalidType(type){
 	'sítios',
 	'fazendas'
 	];
+
+	if(notValidTypesArray.includes(type))
+		console.log('Contém tipo inválido');
 
 	return notValidTypesArray.includes(type);
 }

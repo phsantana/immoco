@@ -29,13 +29,14 @@
         "tabs"
     ],
     "host_permissions": [
-        "https://*.olx.com.br/*"
+        "https://www.olx.com.br/*"
     ],
     "content_scripts": [
       {
         "matches": ["https://*.olx.com.br/*"],
         "js": [
           "./js/utils.js",
+          "./js/routes.js",
           "./js/collector.js",
           "./js/file_generator.js"
         ]

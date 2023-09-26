@@ -62,6 +62,8 @@ function gerarArquivo(estado,tipos,cidade,imoveis){
 
 	console.log('GERANDO ARQUIVO');
 
+	// console.log('Dados recebidos',imoveis);
+
 	var csvMimeType = 'data:text/csv;charset=utf-8,';
 	var csvRowsFileArray = [['tipo','quartos','preço','bairro','cidade','estado','área construida','anunciante','data do anuncio','url','data da coleta','hora da coleta']];
 	
@@ -83,11 +85,23 @@ function gerarArquivo(estado,tipos,cidade,imoveis){
 	});
 
 	tipos = tipos.length > 1 ? tipos.join(',') : tipos.pop();
-	
-	let csvContent = csvMimeType + csvRowsFileArray.map(e => e.join(",")).join("\n");
-	
-	let link = document.createElement('a');
-	link.download = `${estado.toUpperCase()} - ${cidade} - (${tipos}) - ${getDate().dia}-${getDate().mes}-${getDate().ano}.csv`;
-	link.href = csvContent;
-	link.click();
+
+	var timer = setInterval(() => {
+			if((csvRowsFileArray.length-1) == imoveis.length){
+				// console.log('CSV',csvRowsFileArray);
+				let csvContent = csvMimeType + csvRowsFileArray.map(e => e.join(",")).join("\n");
+				let link = document.createElement('a');
+
+				console.log('CSV Content',csvContent);
+				console.log('Link',link);
+
+				csvContent = normalizeCsvContent(csvContent);
+
+				link.download = `${estado.toUpperCase()} - ${cidade} - (${tipos}) - ${getDate().dia}-${getDate().mes}-${getDate().ano}.csv`;
+				link.href = csvContent;
+				link.click();
+
+				clearInterval(timer);
+			}
+	},1000);
 }
